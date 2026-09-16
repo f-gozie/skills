@@ -1,6 +1,6 @@
 # Skills
 
-Claude skills I use every day, cleaned up for any project.
+Just a bunch of skills I use day to day. Take whatever's useful.
 
 | Skill | What it does |
 |---|---|
