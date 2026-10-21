@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: End-of-session ritual for plan-driven work that spans several sessions. Updates the source-of-truth plan, writes a handoff note, optionally commits and pushes, and gives the exact message to paste into the next session. Detects implementation vs design/refinement mode (override with `impl` / `design`; skip git with `--no-push` / `--no-commit`). Run when context is filling up and you want to park the session so a fresh one continues with no re-explaining. Triggers on "checkpoint", "/checkpoint", "park the session", "hand this off".
+description: End-of-session ritual for plan-driven work that stops before it ships. Updates the source-of-truth plan, writes a handoff note into the plan's handoffs folder, optionally commits and pushes, and gives the exact message to paste into the next session. Detects implementation vs design/refinement mode (override with `impl` / `design`; skip git with `--no-push` / `--no-commit`). Run when context is filling up and you want to park the session so a fresh one continues with no re-explaining. Triggers on "checkpoint", "/checkpoint", "park the session", "hand this off".
 ---
 
 # Checkpoint
@@ -8,7 +8,11 @@ description: End-of-session ritual for plan-driven work that spans several sessi
 Park a session so a fresh one can pick up with zero re-explaining.
 
 The working model: **one source-of-truth plan** per effort, **a handoff note** at each session
-boundary, and usually **one branch or PR** that collects the work.
+boundary, and usually **one branch or PR** that collects the work. This is the layout from the
+`plans` skill, but checkpoint also works without it.
+
+**Use it only when work stops before it ships.** If the feature ships in this session, there is
+nothing to hand off: close the plan instead (the `plans` skill's "Close a plan" step).
 
 Two modes, detected automatically (override with `impl` or `design`):
 
@@ -24,10 +28,12 @@ Optional arguments: free notes about what happened, `impl` / `design`, `--no-com
 
 ## Step 0 — Context and mode
 
-- **Find the plans directory.** Look for the project's existing one (`docs/plans/`, `plans/`,
-  `context/plans/`, ...). Check the repo's agent instructions (`CLAUDE.md`, `AGENTS.md`) for a stated
-  location or naming rule. If there is none, use `docs/plans/` and say so.
-- **Find the source-of-truth plan** for this effort. If more than one plan could be it, ask.
+- **Find the plans directory.** Check the repo's agent instructions (`AGENTS.md`, `CLAUDE.md`) for
+  a stated location first. Else look for an existing one (`context/plans/`, `docs/plans/`,
+  `plans/`). If there is none, use `context/plans/` and say so.
+- **Find the source-of-truth plan** for this effort. In the `plans` layout, that is the
+  `active` row in `plans/README.md` and its `<plan-folder>/plan.md`. If more than one plan could
+  be it, ask.
 - **Branch and PR:** `git branch --show-current`; look for an open PR on it
   (`gh pr list --head <branch>`). No PR yet is fine.
 - **Detect the mode** from `git status`, `git diff --stat`, and the conversation:
@@ -46,7 +52,8 @@ Record decisions and new facts. Do not reopen what is already decided.
 **Implementation:**
 
 - Mark phases done / in progress / not started.
-- Update the status line: latest commit, PR, what remains.
+- Add a dated line to the plan's progress log: latest commit, PR, what remains.
+- If the work is pausing with no next session soon, set its registry row to `paused`.
 
 **Design / refinement:**
 
@@ -59,8 +66,13 @@ Record decisions and new facts. Do not reopen what is already decided.
 
 ## Step 2 — Write the handoff
 
-Write `<plans-dir>/<YYYY-MM-DD>-handoff-<effort>.md` with today's date. It must stand alone: a fresh
-session reads it first, then the plan.
+Write a new file. Never edit an older handoff: the chain of handoffs is the history of the work.
+
+- **Plan folder layout:** `<plan-folder>/handoffs/<YYYY-MM-DD>-<NN>-<slug>.md`, where `NN` is the
+  next number for today (`01`, `02`, ...) and the slug names what this session did.
+- **Flat layout (no plan folders):** `<plans-dir>/<YYYY-MM-DD>-handoff-<effort>.md`.
+
+It must stand alone: a fresh session reads it first, then the plan.
 
 **Always include:**
 
