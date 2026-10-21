@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "findings"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["patch is correct", "patch is incorrect"],
+      "description": "Overall verdict on the reviewed diff."
+    },
+    "findings": {
+      "type": "array",
+      "description": "Real, actionable findings tied to a changed file and line. Empty if the diff is clean.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "line", "severity", "category", "title", "body"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Repo-relative path of a file in the reviewed diff."
+          },
+          "line": {
+            "type": "integer",
+            "description": "1-based line number in the changed file."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "warning", "info"],
+            "description": "critical = bug, security hole or broken rule; warning = should fix; info = minor."
+          },
+          "category": {
+            "type": "string",
+            "enum": ["bug", "rule", "security", "test", "simplify", "style", "plan"],
+            "description": "bug = logic or correctness; rule = breaks a rule in AGENTS.md, CLAUDE.md or a standards file; security = a security or privacy issue; test = missing or wrong test; simplify = dead code, duplication, needless complexity; style = naming, comments, idiom; plan = differs from the approved plan."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 140,
+            "description": "One-line summary."
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "What is wrong, why it matters, and the concrete fix."
+          }
+        }
+      }
+    }
+  }
+}
